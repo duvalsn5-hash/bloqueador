@@ -66,7 +66,7 @@ jobs:
           mkdir -p saida
           cp app/build/outputs/apk/debug/app-debug.apk "saida/Bloqueador-TESTE.apk"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Bloqueador-apk
           path: saida/*.apk
