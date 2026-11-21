@@ -99,7 +99,6 @@ class AdVpnService : VpnService() {
     private val dnsBytes = byteArrayOf(10, 111, 100, 2)
     private val emptyBytes = ByteArray(0)
     private var tun: ParcelFileDescriptor? = null
-    private var worker: Thread? = null
     private val pool = Executors.newFixedThreadPool(16)
     private val racePool = Executors.newCachedThreadPool()
     private val ui = Handler(Looper.getMainLooper())
@@ -249,7 +248,7 @@ class AdVpnService : VpnService() {
         if (running || starting) return
         starting = true
         val my = ++gen
-        worker = Thread {
+        Thread {
             try {
                 Blocklist.loadAll(applicationContext)
                 registerNet()

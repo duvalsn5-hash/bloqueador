@@ -3,7 +3,9 @@ name: Build APK
 on:
   push:
     branches: [main]
+    paths-ignore: ["**.md"]   # mudar só o README não gasta compilação
   pull_request:
+    paths-ignore: ["**.md"]
   workflow_dispatch:
 
 # Permissão mínima: o build só precisa ler o código
