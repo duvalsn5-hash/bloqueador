@@ -66,7 +66,6 @@ object Blocklist {
 
     val adsCount: Int get() = ads.size
     val threatCount: Int get() = threats.size
-    val totalDomains: Int get() = ads.size + threats.size + customBlock.size
 
     private fun prefs(ctx: Context) =
         ctx.getSharedPreferences("bloqueador", Context.MODE_PRIVATE)

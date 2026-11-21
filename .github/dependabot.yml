@@ -4,7 +4,19 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Gradle, Android Gradle Plugin e Kotlin: só atualizações pequenas (correções).
+  # Versões grandes (ex.: AGP 9, Kotlin 2) pedem migração do projeto e são feitas à mão.
   - package-ecosystem: gradle
     directory: /
     schedule:
       interval: monthly
+    groups:
+      gradle:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
