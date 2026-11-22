@@ -80,6 +80,9 @@ class MainActivity : Activity() {
         col.addView(btn("Atualizar listas agora") { updateLists() })
         col.addView(btn("Últimos bloqueados (liberar)") { showRecent() })
         col.addView(btn("Apps sem bloqueio") { showApps() })
+        col.addView(btn("📊 Consumo de internet e limpeza") {
+            startActivity(Intent(this, ConsumoActivity::class.java))
+        })
 
         col.addView(sw("Bloquear sites perigosos (malware e phishing)", Prefs.threats(this)) { v ->
             Prefs.setThreats(this, v)

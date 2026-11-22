@@ -90,6 +90,23 @@ class AdVpnService : VpnService() {
         }
 
         fun recentSnapshot(): List<BlockedEntry> = synchronized(recent) { ArrayList(recent) }
+
+        // Domínios mais acessados (permitidos) desde que a proteção foi ligada
+        private val domainHits = ConcurrentHashMap<String, AtomicInteger>()
+
+        fun recordDomain(name: String) {
+            if (name.isEmpty()) return
+            if (domainHits.size > 3000) {
+                // mantém a tabela leve: descarta os que apareceram só uma vez
+                domainHits.entries.removeIf { it.value.get() <= 1 }
+            }
+            domainHits.getOrPut(name) { AtomicInteger(0) }.incrementAndGet()
+        }
+
+        fun topDomains(n: Int): List<Pair<String, Int>> =
+            domainHits.entries.map { it.key to it.value.get() }
+                .sortedByDescending { it.second }
+                .take(n)
     }
 
     private class Question(val name: String, val end: Int, val type: Int)
@@ -158,6 +175,13 @@ class AdVpnService : VpnService() {
         pool.shutdownNow()
         racePool.shutdownNow()
         super.onDestroy()
+    }
+
+    /** Limpa o cache de DNS (ex.: depois de bloquear um domínio). Devolve quantas respostas saíram. */
+    fun clearDnsCache(): Int = synchronized(cache) {
+        val n = cache.size
+        cache.clear()
+        n
     }
 
     fun requestStop() {
@@ -635,6 +659,7 @@ class AdVpnService : VpnService() {
 
     private fun resolve(dns: ByteArray, tcp: Boolean): ByteArray? {
         val q = parseQuestion(dns)
+        if (q != null) recordDomain(q.name.lowercase().trimEnd('.'))
         val key = if (q != null) cacheKey(dns, q) else null
         if (key != null) {
             val hit = cacheGet(key, dns)
