@@ -5,6 +5,10 @@ App Android que bloqueia anúncios, rastreadores, malware e phishing por DNS, us
 
 Desenvolvido por **Edivaldo Nascimento · Iahope-Technology**.
 
+## Baixar
+
+**[⬇ Baixar a versão mais recente](https://github.com/duvalsn5-hash/bloqueador/releases/latest/download/Bloqueador-Iahope-Technology.apk)**
+
 ## Como gerar o APK
 
 1. Cada envio para a branch `main` compila o app automaticamente no GitHub Actions.
