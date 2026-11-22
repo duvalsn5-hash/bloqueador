@@ -73,3 +73,44 @@ jobs:
           name: Bloqueador-apk
           path: saida/*.apk
           retention-days: 30
+
+  # Publica o APK oficial em Releases a cada envio para a main.
+  # Link fixo: https://github.com/duvalsn5-hash/bloqueador/releases/latest/download/Bloqueador-Iahope-Technology.apk
+  release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # só este job pode criar a release
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Bloqueador-apk
+          path: saida
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK="saida/Bloqueador-Iahope-Technology.apk"
+          if [ ! -f "$APK" ]; then
+            echo "::error::APK oficial não encontrado (Secrets da chave ausentes?). Nada publicado."
+            exit 1
+          fi
+          VERSAO=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          TAG="v$VERSAO"
+          NOTAS="Bloqueador de Anúncios $VERSAO
+          Desenvolvido por Edivaldo Nascimento · Iahope-Technology
+
+          Instale o arquivo Bloqueador-Iahope-Technology.apk abaixo."
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" --clobber -R "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$APK" -R "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "Bloqueador $VERSAO" --notes "$NOTAS" --latest
+          fi
