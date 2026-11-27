@@ -72,7 +72,7 @@ jobs:
         with:
           name: Bloqueador-apk
           path: saida/*.apk
-          retention-days: 30
+          retention-days: 1
 
   # Publica o APK oficial em Releases a cada envio para a main.
   # Link fixo: https://github.com/duvalsn5-hash/bloqueador/releases/latest/download/Bloqueador-Iahope-Technology.apk
