@@ -8,7 +8,7 @@ on:
     paths-ignore: ["**.md"]
   workflow_dispatch:
 
-# Permissão mínima: o build só precisa ler o código
+# Permissão mínima por padrão; só o job de build ganha escrita para publicar a release
 permissions:
   contents: read
 
@@ -20,6 +20,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write   # necessário só para a etapa "Publicar release"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -68,32 +70,20 @@ jobs:
           mkdir -p saida
           cp app/build/outputs/apk/debug/app-debug.apk "saida/Bloqueador-TESTE.apk"
 
+      # Em pull requests, guarda o APK de teste como artefato.
+      # Se a cota de artefatos da conta estiver cheia, isso não derruba a compilação.
       - uses: actions/upload-artifact@v7
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
         with:
           name: Bloqueador-apk
           path: saida/*.apk
           retention-days: 1
 
-  # Publica o APK oficial em Releases a cada envio para a main.
-  # Link fixo: https://github.com/duvalsn5-hash/bloqueador/releases/latest/download/Bloqueador-Iahope-Technology.apk
-  release:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write   # só este job pode criar a release
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - uses: actions/download-artifact@v7
-        with:
-          name: Bloqueador-apk
-          path: saida
-
+      # Publica o APK oficial em Releases a cada envio para a main (não usa a cota de artefatos).
+      # Link fixo: https://github.com/duvalsn5-hash/bloqueador/releases/latest/download/Bloqueador-Iahope-Technology.apk
       - name: Publicar release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
